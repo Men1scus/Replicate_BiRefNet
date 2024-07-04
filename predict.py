@@ -66,9 +66,13 @@ def predict_single_image(model, image_path, resolution=(1024, 1024)):
 
     return pred_image
 
+def create_transparent_background_image(image, pred_image):
+    alpha_channel = (pred_image[:, :, 0] > 127).astype(np.uint8) * 255
+    rgba_image = np.dstack((image, alpha_channel))
+    return rgba_image
+
 def save_image(image, save_path):
     cv2.imwrite(save_path, image)
-
 
 class Predictor(BasePredictor):
     def setup(self) -> None:
@@ -85,7 +89,9 @@ class Predictor(BasePredictor):
     ) -> Path:
         """Run a single prediction on the model"""
         resolution = tuple(map(int, resolution.split('x')))
+        original_image = cv2.imread(str(image))
         output_image = predict_single_image(self.model, str(image), resolution)
+        transparent_image = create_transparent_background_image(original_image, output_image)
         output_path = "output.png"
-        save_image(output_image, output_path)
+        save_image(transparent_image, output_path)
         return Path(output_path)
