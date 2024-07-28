@@ -11,3 +11,5 @@ scikit-image
 kornia
 numpy<2.0.0
 Pillow
+cog
+transformers
